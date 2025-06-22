@@ -1,5 +1,6 @@
 import { transactionSchema } from "../schemas/transactionsSchema.js";
 import db from "../config/database.js";
+import dayjs from "dayjs";
 
 export async function addTransaction(req, res) {
   const {value, description, type} = req.body;
@@ -10,12 +11,13 @@ export async function addTransaction(req, res) {
     return res.status(422).send(errors);
   }
 
-  const {userId, name} = res.locals.user;
-
+  const {userId} = res.locals.user;
+  const formatedDate = dayjs().format("DD/MM");
   
   try {
     await db.collection('transactions').insertOne({
       ...req.body,
+      date: formatedDate,
       userId
     });
     return res.status(201).send('Transação adicionada com sucesso!');
@@ -23,5 +25,9 @@ export async function addTransaction(req, res) {
     return res.status(500).send(error.message);
   }
 
+
+}
+
+export async function getTransactions(req, res) {
 
 }
