@@ -84,3 +84,26 @@ export async function updateTransaction(req, res) {
     return res.status(500).send(error.message);
   }
 }
+
+export async function deleteTransaction(req, res) {
+  const {userId} = res.locals.user;
+  const {id} = req.params;
+
+  try {
+    const transaction = await db.collection('transactions').findOne({_id: new ObjectId(id)});
+    
+    if(!transaction) return res.status(404).send('Transação não encontrada!');
+
+    if (transaction.userId !== userId) return res.status(401).send('Você não tem autorização para deletar essa transação!');
+
+    const deleteTransaction = await db.collection('transactions').deleteOne({_id: new ObjectId(id)});
+
+    if(deleteTransaction.deletedCount > 0) return res.sendStatus(204);
+
+    return res.status(500).send('Erro ao tentar deletar a transação!');
+
+
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
