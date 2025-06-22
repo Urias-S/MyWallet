@@ -29,5 +29,29 @@ export async function addTransaction(req, res) {
 }
 
 export async function getTransactions(req, res) {
+  
+  let page = 1;
+  if (req.query.page !== undefined) {
+    page = Number(req.query.page);
+    if (page < 1) {
+      return res.status(400).send('Página inválida, o valor deve ser maior ou igual a 1')
+    }
+  }
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    const allTransactions = await db
+    .collection('transactions')
+    .find({userId: res.locals.user.userId})
+    .skip(skip)
+    .limit(limit)
+    .toArray();
+    allTransactions.reverse();
+    return res.status(200).send(allTransactions);
+
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
 
 }
